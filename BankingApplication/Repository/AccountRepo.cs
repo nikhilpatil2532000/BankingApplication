@@ -26,7 +26,9 @@ namespace BankingApplication.Repository
 
         public bool CheckAccountIsPresent(long accountNumber)
         {
-            BankAccount bankAccount = _context.BankAccounts.Find(accountNumber);
+            var bankAccount = (from i in _context.BankAccounts 
+                              where i.AccountNo == accountNumber
+                              select i).FirstOrDefault();
             if (bankAccount != null)
             {
                 return true;
