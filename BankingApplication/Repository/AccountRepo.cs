@@ -41,23 +41,30 @@ namespace BankingApplication.Repository
             ICustomerRepo customerRepo = _serviceProvider.GetRequiredService<ICustomerRepo>();
             ITransactionRepo transactionRepo = _serviceProvider.GetRequiredService<ITransactionRepo>();
 
-            if (customerRepo.CheckCustomerIsPresent(initBankAccountModel.CustomerId))
+            if (initBankAccountModel.TotalBalance >= 3000)
             {
-                BankAccountModel bankAccountModel = _mapper.Map<BankAccountModel>(initBankAccountModel);
-                bankAccountModel.AccountNo = gen.Generator16DigitUniqueNumber();
-                bankAccountModel.ActivationDate = DateTime.Now;
-                bankAccountModel.TotalBalance = 0;
-                _context.BankAccounts.Add(_mapper.Map<BankAccount>(bankAccountModel));
-                _context.SaveChanges();
-                message += "Account is Added\n";
+                if (customerRepo.CheckCustomerIsPresent(initBankAccountModel.CustomerId))
+                {
+                    BankAccountModel bankAccountModel = _mapper.Map<BankAccountModel>(initBankAccountModel);
+                    bankAccountModel.AccountNo = gen.Generator16DigitUniqueNumber();
+                    bankAccountModel.ActivationDate = DateTime.Now;
+                    bankAccountModel.TotalBalance = 0;
+                    _context.BankAccounts.Add(_mapper.Map<BankAccount>(bankAccountModel));
+                    _context.SaveChanges();
+                    message += "Account is Added\n";
 
-                InitBankTransactionModel bankTransaction
-                    = new InitBankTransactionModel(bankAccountModel.AccountNo, "credit", initBankAccountModel.TotalBalance);
-                message += transactionRepo.AddTransaction(bankTransaction)+"\n";
+                    InitBankTransactionModel bankTransaction
+                        = new InitBankTransactionModel(bankAccountModel.AccountNo, "credit", initBankAccountModel.TotalBalance);
+                    message += transactionRepo.AddTransaction(bankTransaction).Item2 + "\n";
+                }
+                else
+                {
+                    message += "Customer ID is not found\n";
+                }
             }
             else
             {
-                message += "Customer ID is not found\n"; 
+                message += "Minimum 3000 balance required\n";
             }
             return message;
         }
@@ -90,8 +97,8 @@ namespace BankingApplication.Repository
 
         public double GetInterestByAccountNumber(long bankAccountNumber,int numberOfDays)
         {
-            BankAccountModel bankAccountModel = GetAccountByAccountNumber(bankAccountNumber);
             Func<string,IAccount> iAccount = _serviceProvider.GetRequiredService<Func<string, IAccount>>();
+            BankAccountModel bankAccountModel = GetAccountByAccountNumber(bankAccountNumber);
             DateTime fromDate = DateTime.Now.Date - TimeSpan.FromDays(numberOfDays);
             DateTime toDate = DateTime.Now.Date;
             return iAccount(bankAccountModel.Type).TotalInterest(bankAccountModel,fromDate,toDate);

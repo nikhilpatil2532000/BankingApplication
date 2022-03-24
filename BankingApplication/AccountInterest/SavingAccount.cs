@@ -28,9 +28,9 @@ namespace BankingApplication.AccountInterest
 
         public (bool, string) CheckTransactionIsValid(BankTransactionModel bankTransactionModel)
         { 
-            if (bankTransactionModel.Type == "debit")
+            var bankAccount = _context.BankAccounts.Find(bankTransactionModel.AccountNo);
+            if (bankTransactionModel.Type == "debit" )
             {
-                var bankAccount = _context.BankAccounts.Find(bankTransactionModel.AccountNo);
                 var listOfBankTransactionModels = (from i in _context.BankTransactions
                                               where i.AccountNo == bankAccount.AccountNo 
                                               && i.Type == "debit" && i.Date.Date == DateTime.Now.Date
@@ -43,11 +43,19 @@ namespace BankingApplication.AccountInterest
                 {
                     return (false, "Maximum withdrawal amount reached\nTransaction failed");
                 }
+                //fix
                 if (bankAccount.TotalBalance - bankTransactionModel.Amount < 3000)
                 {
-                    return (false, "Minimum Rs.3000 balance is required in Account\n Transaction failed\nTransaction failed");
+                    return (false, "Minimum Rs.3000 balance is required in Account\nTransaction failed");
                 }
             }
+            //else if(bankTransactionModel.Type == "credit")
+            //{
+            //    if (bankAccount.TotalBalance + bankTransactionModel.Amount < 3000)
+            //    {
+            //        return (false, "Minimum Rs.3000 balance is required in Account\nTransaction failed");
+            //    }
+            //}
             return (true, "\nTransaction completed");
         }
 
@@ -63,7 +71,7 @@ namespace BankingApplication.AccountInterest
             double interest = 0;
 
             TimeSpan timeSpan = toDate - listTran[0].Date;
-            interest += (4 / 100) * (timeSpan.TotalDays / 365) * (closingBalance);
+            interest += (rateOfInterest / 100.0) * (Math.Abs(timeSpan.TotalDays) / 365.0) * (closingBalance);
             for (int i = 0; i < listTran.Count; i++)
             {
                 if (listTran[i].Type == "credit")
@@ -74,7 +82,7 @@ namespace BankingApplication.AccountInterest
                 {
                     closingBalance -= listTran[i].Amount;
                 }
-                //fix
+
                 if (i<listTran.Count-1)
                 {
                     timeSpan = listTran[i].Date - listTran[i + 1].Date;
@@ -83,9 +91,8 @@ namespace BankingApplication.AccountInterest
                 {
                     timeSpan = listTran[i].Date - fromDate;
                 }
-                interest += (4 / 100) * (timeSpan.TotalDays / 365) * (closingBalance);
+                interest += (4 / 100.0) * (Math.Abs(timeSpan.TotalDays) / 365.0) * (closingBalance);
             }
-            interest += (4 / 100) * (timeSpan.TotalDays / 365) * (closingBalance);
             return interest;
         }
     }

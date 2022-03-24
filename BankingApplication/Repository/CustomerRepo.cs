@@ -40,19 +40,26 @@ namespace BankingApplication.Repository
             IGenerateID gen = _serviceProvider.GetRequiredService<IGenerateID>();
             IAccountRepo accountRepo = _serviceProvider.GetRequiredService<IAccountRepo>();
 
-            AddNewCustomerModel addNewCustomerModel = _mapper.Map<AddNewCustomerModel>(newCustomer);
-            addNewCustomerModel.CustomerId = gen.Generator4DigitUniqueNumber();
-            addNewCustomerModel.CreationDate = DateTime.Now;
-            addNewCustomerModel.ActivationDate = DateTime.Now;
+            if (newCustomer.Type == "Saving" && newCustomer.TotalBalance >= 3000)
+            {
+                AddNewCustomerModel addNewCustomerModel = _mapper.Map<AddNewCustomerModel>(newCustomer);
+                addNewCustomerModel.CustomerId = gen.Generator4DigitUniqueNumber();
+                addNewCustomerModel.CreationDate = DateTime.Now;
+                addNewCustomerModel.ActivationDate = DateTime.Now;
 
-            BankCustomerModel bankCustomerModel = _mapper.Map<BankCustomerModel>(addNewCustomerModel);
-            _context.BankCustomers.Add(_mapper.Map<BankCustomer>(bankCustomerModel));
-            _context.SaveChanges();
-            message += "Customer is Added\n";
-            InitBankAccountModel initBankAccountModel
-                = new InitBankAccountModel(addNewCustomerModel.CustomerId,addNewCustomerModel.Type,addNewCustomerModel.TotalBalance,addNewCustomerModel.Status);
+                BankCustomerModel bankCustomerModel = _mapper.Map<BankCustomerModel>(addNewCustomerModel);
+                _context.BankCustomers.Add(_mapper.Map<BankCustomer>(bankCustomerModel));
+                _context.SaveChanges();
+                message += "Customer is Added\n";
+                InitBankAccountModel initBankAccountModel
+                    = new InitBankAccountModel(addNewCustomerModel.CustomerId, addNewCustomerModel.Type, addNewCustomerModel.TotalBalance, addNewCustomerModel.Status);
 
-            message += accountRepo.AddAccount(initBankAccountModel)+"\n";
+                message += accountRepo.AddAccount(initBankAccountModel) + "\n";
+            }
+            else
+            {
+                message += "Minimum 3000 balance required\n";
+            }
             return message;
         }
 
