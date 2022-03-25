@@ -3,6 +3,7 @@ using BankingApplication.AccountInterest;
 using BankingApplication.DAL;
 using BankingApplication.IdProvider;
 using BankingApplication.Models;
+using BankingApplication.StaticValues;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -26,9 +27,7 @@ namespace BankingApplication.Repository
 
         public bool CheckAccountIsPresent(long accountNumber)
         {
-            var bankAccount = (from i in _context.BankAccounts 
-                              where i.AccountNo == accountNumber
-                              select i).FirstOrDefault();
+            var bankAccount = _context.BankAccounts.Find(accountNumber);
             if (bankAccount != null)
             {
                 return true;
@@ -43,30 +42,23 @@ namespace BankingApplication.Repository
             ICustomerRepo customerRepo = _serviceProvider.GetRequiredService<ICustomerRepo>();
             ITransactionRepo transactionRepo = _serviceProvider.GetRequiredService<ITransactionRepo>();
 
-            if (initBankAccountModel.TotalBalance >= 3000)
+            if (customerRepo.CheckCustomerIsPresent(initBankAccountModel.CustomerId))
             {
-                if (customerRepo.CheckCustomerIsPresent(initBankAccountModel.CustomerId))
-                {
-                    BankAccountModel bankAccountModel = _mapper.Map<BankAccountModel>(initBankAccountModel);
-                    bankAccountModel.AccountNo = gen.Generator16DigitUniqueNumber();
-                    bankAccountModel.ActivationDate = DateTime.Now;
-                    bankAccountModel.TotalBalance = 0;
-                    _context.BankAccounts.Add(_mapper.Map<BankAccount>(bankAccountModel));
-                    _context.SaveChanges();
-                    message += "Account is Added\n";
+                BankAccountModel bankAccountModel = _mapper.Map<BankAccountModel>(initBankAccountModel);
+                bankAccountModel.AccountNo = gen.Generator16DigitUniqueNumber();
+                bankAccountModel.ActivationDate = DateTime.Now;
+                bankAccountModel.TotalBalance = 0;
+                _context.BankAccounts.Add(_mapper.Map<BankAccount>(bankAccountModel));
+                _context.SaveChanges();
+                message += "Account is Added\n";
 
-                    InitBankTransactionModel bankTransaction
-                        = new InitBankTransactionModel(bankAccountModel.AccountNo, "credit", initBankAccountModel.TotalBalance);
-                    message += transactionRepo.AddTransaction(bankTransaction).Item2 + "\n";
-                }
-                else
-                {
-                    message += "Customer ID is not found\n";
-                }
+                InitBankTransactionModel bankTransaction
+                    = new InitBankTransactionModel(bankAccountModel.AccountNo, "credit", initBankAccountModel.TotalBalance);
+                message += transactionRepo.AddTransaction(bankTransaction).Item2 + "\n";
             }
             else
             {
-                message += "Minimum 3000 balance required\n";
+                message += "Customer ID is not found\n";
             }
             return message;
         }
@@ -93,6 +85,16 @@ namespace BankingApplication.Repository
             if (CheckAccountIsPresent(accountNumber))
             {
                 return transactionRepo.TransactionSummary(accountNumber, numberOfTransaction);
+            }
+            return "Account is not found";
+        }
+
+        public string GetAccountTransactionSummaryByDate(long accountNumber, DateTime fromDate, DateTime toDate)
+        {
+            ITransactionRepo transactionRepo = _serviceProvider.GetRequiredService<ITransactionRepo>();
+            if (CheckAccountIsPresent(accountNumber))
+            {
+                return transactionRepo.TransactionSummaryByDate(accountNumber,fromDate,toDate);
             }
             return "Account is not found";
         }
@@ -126,13 +128,24 @@ namespace BankingApplication.Repository
             string message = "";
             ITransactionRepo transactionRepo = _serviceProvider.GetRequiredService<ITransactionRepo>();
             var temp = transactionRepo.DeleteTransactionByAccountNumber(accountNumber);
+            BankAccount bankAccount;
             if (temp.Item1)
             {
                 message += temp.Item2;
-                BankAccount bankAccount = _context.BankAccounts.Find(accountNumber);
+                bankAccount = _context.BankAccounts.Find(accountNumber);
                 _context.BankAccounts.Remove(bankAccount);
                 _context.SaveChanges();
                 message += "Account Number "+bankAccount.AccountNo+" is deleted sucessfully\n";
+                int countOfAccounts = (from i in _context.BankAccounts
+                                       where i.CustomerId == bankAccount.CustomerId
+                                       select i).Count();
+                if (countOfAccounts == 0)
+                {
+                    BankCustomer bankCustomer = _context.BankCustomers.Find(bankAccount.CustomerId);
+                    _context.BankCustomers.Remove(bankCustomer);
+                    _context.SaveChanges();
+                    message += "Customer ID "+bankCustomer.CustomerId+" is deleted sucessfully";
+                }
             }
             return (true, message);
         }

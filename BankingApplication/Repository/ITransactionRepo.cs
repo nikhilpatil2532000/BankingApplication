@@ -13,6 +13,7 @@ namespace BankingApplication.Repository
         (bool, string) AddTransaction(InitBankTransactionModel tranModel);
         string AddTransferTransaction(long fromAccountNumber, long toAccountNumber, long amount);
         string TransactionSummary(long accountNumber, int numberOfTransaction);
+        string TransactionSummaryByDate(long accountNumber, DateTime fromDate, DateTime toDate);
         (bool, string) DeleteTransactionByAccountNumber(long accountNumber);
     }
 }

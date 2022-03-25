@@ -34,32 +34,47 @@ namespace BankingApplication.Repository
             return false;
         }
 
+        //public string AddCustomer(InitAddNewCustomerModel newCustomer)
+        //{
+        //    string message = "";
+        //    IGenerateID gen = _serviceProvider.GetRequiredService<IGenerateID>();
+        //    IAccountRepo accountRepo = _serviceProvider.GetRequiredService<IAccountRepo>();
+
+        //    AddNewCustomerModel addNewCustomerModel = _mapper.Map<AddNewCustomerModel>(newCustomer);
+        //    addNewCustomerModel.CustomerId = gen.Generator4DigitUniqueNumber();
+        //    addNewCustomerModel.CreationDate = DateTime.Now;
+        //    addNewCustomerModel.ActivationDate = DateTime.Now;
+
+        //    BankCustomerModel bankCustomerModel = _mapper.Map<BankCustomerModel>(addNewCustomerModel);
+        //    _context.BankCustomers.Add(_mapper.Map<BankCustomer>(bankCustomerModel));
+        //    _context.SaveChanges();
+        //    message += "Customer is Added\n";
+        //    InitBankAccountModel initBankAccountModel
+        //        = new InitBankAccountModel(addNewCustomerModel.CustomerId, addNewCustomerModel.Type, addNewCustomerModel.TotalBalance, addNewCustomerModel.Status);
+
+        //    message += accountRepo.AddAccount(initBankAccountModel) + "\n";
+
+        //    return message;
+        //}
+
         public string AddCustomer(InitAddNewCustomerModel newCustomer)
         {
             string message = "";
             IGenerateID gen = _serviceProvider.GetRequiredService<IGenerateID>();
             IAccountRepo accountRepo = _serviceProvider.GetRequiredService<IAccountRepo>();
 
-            if (newCustomer.Type == "Saving" && newCustomer.TotalBalance >= 3000)
-            {
-                AddNewCustomerModel addNewCustomerModel = _mapper.Map<AddNewCustomerModel>(newCustomer);
-                addNewCustomerModel.CustomerId = gen.Generator4DigitUniqueNumber();
-                addNewCustomerModel.CreationDate = DateTime.Now;
-                addNewCustomerModel.ActivationDate = DateTime.Now;
 
-                BankCustomerModel bankCustomerModel = _mapper.Map<BankCustomerModel>(addNewCustomerModel);
-                _context.BankCustomers.Add(_mapper.Map<BankCustomer>(bankCustomerModel));
-                _context.SaveChanges();
-                message += "Customer is Added\n";
-                InitBankAccountModel initBankAccountModel
-                    = new InitBankAccountModel(addNewCustomerModel.CustomerId, addNewCustomerModel.Type, addNewCustomerModel.TotalBalance, addNewCustomerModel.Status);
+            BankCustomerModel bankCustomerModel = _mapper.Map<BankCustomerModel>(newCustomer);
+            bankCustomerModel.CustomerId = gen.Generator4DigitUniqueNumber();
+            bankCustomerModel.CreationDate = DateTime.Now;
+            _context.BankCustomers.Add(_mapper.Map<BankCustomer>(bankCustomerModel));
+            _context.SaveChanges();
+            message += "Customer is Added\n";
+            InitBankAccountModel initBankAccountModel
+                = new InitBankAccountModel(bankCustomerModel.CustomerId, newCustomer.Type, newCustomer.TotalBalance, newCustomer.Status);
 
-                message += accountRepo.AddAccount(initBankAccountModel) + "\n";
-            }
-            else
-            {
-                message += "Minimum 3000 balance required\n";
-            }
+            message += accountRepo.AddAccount(initBankAccountModel) + "\n";
+
             return message;
         }
 
@@ -100,12 +115,6 @@ namespace BankingApplication.Repository
                 {
                     message += accountRepo.DeleteAccountByAccountNumber(i).Item2;
                 }
-                BankCustomer bankCustomer = (from i in _context.BankCustomers
-                                             where i.CustomerId == customerId
-                                             select i).FirstOrDefault();
-                _context.BankCustomers.Remove(bankCustomer);
-                _context.SaveChanges();
-                message += "Customer deleted sucessfully\n";
             }
             else
             {

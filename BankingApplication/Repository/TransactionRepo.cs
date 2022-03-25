@@ -146,6 +146,20 @@ namespace BankingApplication.Repository
             return summary;
         }
 
+        public string TransactionSummaryByDate(long accountNumber, DateTime fromDate, DateTime toDate)
+        {
+            string summary = "";
+            List<BankTransactionModel> listOfTransactions = (_context.BankTransactions
+                                          .Where(i => i.AccountNo == accountNumber 
+                                          && i.Date.Date>=fromDate.Date && i.Date.Date<=toDate.Date)
+                                          .Select(i => _mapper.Map<BankTransactionModel>(i))).ToList();
+            foreach (BankTransactionModel i in listOfTransactions)
+            {
+                summary += i.ToString();
+            }
+            return summary;
+        }
+
         public (bool, string) DeleteTransactionByAccountNumber(long accountNumber)
         {
             var allTransaction = (from i in _context.BankTransactions

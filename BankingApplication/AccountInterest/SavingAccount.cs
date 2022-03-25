@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BankingApplication.DAL;
 using BankingApplication.Models;
+using BankingApplication.StaticValues;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,12 +12,14 @@ namespace BankingApplication.AccountInterest
     public class SavingAccount : IAccount
     {
         //maximum 4 transaction allow 
-        private static readonly long MAX_TRANSACTION = 4;
+        private static readonly long MAX_TRANSACTION = Saving.MAX_TRANSACTION;
 
         //maximum 50k ammount can withdrawn
-        private static readonly long MAX_AMOUNT = 50000;
+        private static readonly long MAX_AMOUNT = Saving.MAX_AMOUNT;
 
-        private static readonly int rateOfInterest = 4;
+        private static readonly double rateOfInterest = Saving.rateOfInterest;
+
+        private static readonly long MINIMUM_BALANCE = Saving.MINIMUM_BALANCE;
 
         private SmallOfficeContext _context;
         private IMapper _mapper;
@@ -43,19 +46,11 @@ namespace BankingApplication.AccountInterest
                 {
                     return (false, "Maximum withdrawal amount reached\nTransaction failed");
                 }
-                //fix
-                if (bankAccount.TotalBalance - bankTransactionModel.Amount < 3000)
+                if (bankAccount.TotalBalance - bankTransactionModel.Amount < MINIMUM_BALANCE)
                 {
-                    return (false, "Minimum Rs.3000 balance is required in Account\nTransaction failed");
+                    return (false, "Minimum Rs."+MINIMUM_BALANCE+" balance is required in Account\nTransaction failed");
                 }
             }
-            //else if(bankTransactionModel.Type == "credit")
-            //{
-            //    if (bankAccount.TotalBalance + bankTransactionModel.Amount < 3000)
-            //    {
-            //        return (false, "Minimum Rs.3000 balance is required in Account\nTransaction failed");
-            //    }
-            //}
             return (true, "\nTransaction completed");
         }
 

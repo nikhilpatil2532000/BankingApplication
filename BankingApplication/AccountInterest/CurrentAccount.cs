@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BankingApplication.DAL;
 using BankingApplication.Models;
+using BankingApplication.StaticValues;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,13 +12,12 @@ namespace BankingApplication.AccountInterest
     public class CurrentAccount : IAccount
     {
         private SmallOfficeContext _context;
-        //maximum 4 transaction allow 
-        private static readonly long MAX_TRANSACTION = 12;
 
-        //maximum 1,000,000 ammount can withdrawn
-        private static readonly long MAX_AMOUNT = 1000000;
+        private static readonly long MAX_TRANSACTION = Current.MAX_TRANSACTION;
 
-        private static readonly int rateOfInterest = 0;
+        private static readonly long MAX_AMOUNT = Current.MAX_AMOUNT;
+
+        private static readonly double rateOfInterest = Current.rateOfInterest;
 
         private IMapper _mapper;
 

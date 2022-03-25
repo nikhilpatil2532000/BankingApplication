@@ -51,6 +51,12 @@ namespace BankingApplication.Controllers
             return Ok(_accRepo.GetAccountTransactionSummary(accountNumber, numberOfTransaction));
         }
 
+        [HttpGet("GetAccountTransactionSummaryByDate")]
+        public IActionResult GetAccountTransactionSummaryByDate(long accountNumber,DateTime fromDate,DateTime toDate)
+        {
+            return Ok(_accRepo.GetAccountTransactionSummaryByDate(accountNumber,fromDate,toDate));
+        }
+
         [HttpGet("GetInterestByAccountNumber")]
         public IActionResult GetInterestByAccountNumber(long bankAccountNumber, int numberOfDays)
         {

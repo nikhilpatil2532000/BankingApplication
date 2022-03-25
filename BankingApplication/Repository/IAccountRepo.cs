@@ -15,6 +15,7 @@ namespace BankingApplication.Repository
         List<BankAccountModel> GetAccountByCustomerId(long customerId);
         List<BankAccountModel> GetAllAccounts();
         string GetAccountTransactionSummary(long accountNumber, int numberOfTransaction);
+        string GetAccountTransactionSummaryByDate(long accountNumber, DateTime fromDate, DateTime toDate);
         double GetInterestByAccountNumber(long bankAccountNumber, int numberOfDays);
         string UpdateAccountDetails(long accountNumber, JsonPatchDocument bankAccountModel);
         (bool, string) DeleteAccountByAccountNumber(long accountNumber);
