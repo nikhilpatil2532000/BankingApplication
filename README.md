@@ -1,4 +1,4 @@
-This was my internship project where i created web API's so that you can handle basic CRUD operations of Banking application. 
+This was my internship project where i created web API's to handle basic CRUD operations of Banking application. 
 
 You can create multiple bank accounts of multiple types, like saving or current. 
 
