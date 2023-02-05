@@ -1,0 +1,33 @@
+<div class="container">
+  <div class="row ">
+    <nav class="nav justify-content-left">
+      <a
+        name=""
+        id=""
+        class="btn btn-primary"
+        [routerLink]="['']"
+        routerLinkActive="router-link-active"
+        role="button"
+        >Home</a
+      >
+      <a
+        id="customer"
+        class="nav-link active border border-info mx-2"
+        [routerLink]="['/customer/list']"
+        routerLinkActive="router-link-active"
+        >Customer</a
+      >
+      <a
+        id="home"
+        class="nav-link active border border-info"
+        [routerLink]="['/account/list']"
+        routerLinkActive="router-link-active"
+        >Account</a
+      >
+    </nav>
+  </div>
+
+  <div class="row p-3 my-2 border border-info text-black" id="row2">
+    <router-outlet></router-outlet>
+  </div>
+</div>

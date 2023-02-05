@@ -1,0 +1,35 @@
+.col{
+  border-radius: 7px;
+  margin: 7px;
+  padding: 7px;
+}
+
+.row{
+  border-radius: 7px;
+  margin: 7px;
+  padding: 2px;
+}
+
+#accountGrid{
+  width: 215px;
+}
+
+.redStatusIcon{
+  background-color: red
+}
+
+.roundIcon{
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin: 6px;
+  background-color: rgb(242, 248, 243);
+}
+
+#GreenRoundIcon{
+  background-color: green;
+}
+
+#RedRoundIcon{
+  background-color: red;
+}
